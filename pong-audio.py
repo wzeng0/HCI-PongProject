@@ -140,7 +140,7 @@ dispatcher_2.map("/c", on_receive_connection_2, "c")
 # -------------------------------------#
 #play some fun sounds?
 def hit():
-    # playsound('hit.wav', True)
+    playsound('hit.wav', True)
     pass
 
 # used to send messages to host
@@ -251,6 +251,8 @@ def listen_to_speech():
                 client.send_message('/l', 2)
             if recog_results == "insane":
                 client.send_message('/l', 3)
+            if recog_results == "quit":
+                quit = True
         except sr.UnknownValueError:
             print("[speech recognition] Google Speech Recognition could not understand audio")
         except sr.RequestError as e:
@@ -275,6 +277,15 @@ def sense_microphone():
         # Format the volume output so that at most
         # it has six decimal numbers.
         volume = "{:.6f}".format(volume)
+
+        # 65 -> 25
+        # 140 -> 435
+        low = 121
+        high = 235
+        scaledPitch = (pitch - low) * (435 / (high - low))
+        if float(volume) != 0:
+            if pitch != 0 and scaledPitch > 0 and scaledPitch < 435:
+                client.send_message('/p', scaledPitch)
 
         # uncomment these lines if you want pitch or volume
         if debug:
