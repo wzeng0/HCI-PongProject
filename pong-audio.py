@@ -37,7 +37,6 @@ from pythonosc import osc_server
 from pythonosc import dispatcher
 from pythonosc import udp_client
 
-# from pysine import sine
 from time import sleep
 
 frames = 0
@@ -85,6 +84,7 @@ if __name__ == '__main__' :
         player_port = args.player_port
     if (args.debug):
         debug = True
+    playsound('Directions.wav', True)
 
 # Host
 # -------------------------------------#
@@ -163,7 +163,7 @@ def on_receive_ball(address, *args):
     if frames % 15 == 0:
         unscaled = (args[1] / (435 / 120)) + 120
         rounded = (unscaled // 10) * 10
-        sound = str(int(rounded)) + "hz.wav"
+        sound = "freq/" + str(int(rounded)) + "hz.wav"
         print(sound)
         playsound(sound, True)
 
@@ -274,7 +274,7 @@ def listen_to_speech():
             if recog_results == "insane":
                 client.send_message('/l', 3)
                 playsound('Insane_Mode.wav', True)
-            if recog_results == "quit":
+            if recog_results == "quit" or recog_results == "exit":
                 playsound('Quit_Game.wav', True)
                 quit = True
         except sr.UnknownValueError:
