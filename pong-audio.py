@@ -37,6 +37,11 @@ from pythonosc import osc_server
 from pythonosc import dispatcher
 from pythonosc import udp_client
 
+# from pysine import sine
+from time import sleep
+
+frames = 0
+
 mode = ''
 debug = False
 
@@ -152,11 +157,18 @@ if mode == 'player':
 
 # functions receiving messages from host
 def on_receive_ball(address, *args):
-    unscaled = (args[0] / (435 / (240 - 120))) + 120
-    rounded = (unscaled % 10) * 10
-    sound = str(rounded) + 'hz.wav'
-    playsound(sound, True)
-    # print("> ball position: (" + str(args[0]) + ", " + str(args[1]) + ")")
+    global frames
+    frames += 1
+
+    if frames % 25 == 0:
+        unscaled = (args[1] / (435 / 120)) + 120
+        rounded = (unscaled // 10) * 10
+        sound = str(int(rounded)) + "hz.wav"
+        print(sound)
+        playsound(sound, True)
+
+    # sine(frequency=unscaled, duration=1.0)
+    print("> ball position: (" + str(args[0]) + ", " + str(args[1]) + ")")
     pass
 
 def on_receive_paddle(address, *args):
