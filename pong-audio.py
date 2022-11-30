@@ -160,7 +160,7 @@ def on_receive_ball(address, *args):
     global frames
     frames += 1
 
-    if frames % 25 == 0:
+    if frames % 15 == 0:
         unscaled = (args[1] / (435 / 120)) + 120
         rounded = (unscaled // 10) * 10
         sound = str(int(rounded)) + "hz.wav"
