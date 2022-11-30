@@ -139,9 +139,11 @@ dispatcher_2.map("/c", on_receive_connection_2, "c")
 # TODO: add audio output here so that you can play the game eyes-free
 # -------------------------------------#
 #play some fun sounds?
-def hit():
-    playsound('hit.wav', True)
-    pass
+def hitWall():
+    playsound('ballBounce.wav', True)
+
+def hitPaddle():
+    playsound('hitPaddle.wav', True)
 
 # used to send messages to host
 if mode == 'player':
@@ -150,6 +152,10 @@ if mode == 'player':
 
 # functions receiving messages from host
 def on_receive_ball(address, *args):
+    unscaled = (args[0] / (435 / (240 - 120))) + 120
+    rounded = (unscaled % 10) * 10
+    sound = str(rounded) + 'hz.wav'
+    playsound(sound, True)
     # print("> ball position: (" + str(args[0]) + ", " + str(args[1]) + ")")
     pass
 
@@ -159,15 +165,15 @@ def on_receive_paddle(address, *args):
 
 def on_receive_hitpaddle(address, *args):
     # example sound
-    hit()
-    print("> ball hit at paddle " + str(args[0]) )
+    hitPaddle()
+    print("> ball hitWall at paddle " + str(args[0]) )
 
 def on_receive_ballout(address, *args):
     print("> ball went out on left/right side: " + str(args[0]) )
 
 def on_receive_ballbounce(address, *args):
     # example sound
-    hit()
+    hitWall()
     print("> ball bounced on up/down side: " + str(args[0]) )
 
 def on_receive_scores(address, *args):
@@ -243,15 +249,21 @@ def listen_to_speech():
             # if recognizing quit and exit then exit the program
             if recog_results == "play" or recog_results == "start":
                 client.send_message('/g', 1)
+                playsound('Begin_Game.wav', True)
             if recog_results == "pause":
                 client.send_message('/g', 0)
+                playsound('Pause_Game.wav', True)
             if recog_results == "easy":
                 client.send_message('/l', 1)
+                playsound('Easy_mode.wav', True)
             if recog_results == "hard":
                 client.send_message('/l', 2)
+                playsound('Hard_Mode.wav', True)
             if recog_results == "insane":
                 client.send_message('/l', 3)
+                playsound('Insane_Mode.wav', True)
             if recog_results == "quit":
+                playsound('Quit_Game.wav', True)
                 quit = True
         except sr.UnknownValueError:
             print("[speech recognition] Google Speech Recognition could not understand audio")
@@ -280,8 +292,8 @@ def sense_microphone():
 
         # 65 -> 25
         # 140 -> 435
-        low = 121
-        high = 235
+        low = 120
+        high = 240
         scaledPitch = (pitch - low) * (435 / (high - low))
         if float(volume) != 0:
             if pitch != 0 and scaledPitch > 0 and scaledPitch < 435:
@@ -354,9 +366,11 @@ class Model(object):
         self.ball.y = float( random.randint(0, self.HEIGHT) )
         self.ball.vec_y = random.choice([-1, 1]) * 2**0.5 / 2
         if who_scored == 0:
+            playsound('P1_Scored.wav', True)
             self.ball.x = self.WIDTH - 50.0 - self.ball.TO_SIDE
             self.ball.vec_x = - 2**0.5 / 2
         elif who_scored == 1:
+            playsound('P2_Scored.wav', True)
             self.ball.x = 50.0 + self.ball.TO_SIDE
             self.ball.vec_x = + 2**0.5 / 2
         elif who_scored == "debug":
@@ -413,7 +427,7 @@ class Model(object):
                 client_2.send_message("/scores", [p1_score, p2_score])
 
     def check_if_paddled(self): 
-        """Called by update_ball to recalc. a ball hit with a player paddle."""
+        """Called by update_ball to recalc. a ball hitWall with a player paddle."""
         b = self.ball
         p0, p1 = self.players[0], self.players[1]
         angle = math.acos(b.vec_y)  
@@ -425,7 +439,7 @@ class Model(object):
                 client_1.send_message("/hitpaddle", 1)
             if (client_2 != None):
                 client_2.send_message("/hitpaddle", 1)
-            if debug: print("hit at "+str(self.i))
+            if debug: print("hitWall at "+str(self.i))
             illegal_movement = p0.x + 2*b.TO_SIDE - b.x
             b.x = p0.x + 2*b.TO_SIDE + illegal_movement
             # angle -= sum(p0.last_movements) / factor / self.ball_speed
@@ -436,7 +450,7 @@ class Model(object):
                 client_1.send_message("/hitpaddle", 2)
             if (client_2 != None):
                 client_2.send_message("/hitpaddle", 2)
-            if debug: print("hit at "+str(self.i))
+            if debug: print("hitWall at "+str(self.i))
             illegal_movement = p1.x - 2*b.TO_SIDE - b.x
             b.x = p1.x - 2*b.TO_SIDE + illegal_movement
             # angle -= sum(p1.last_movements) / factor / self.ball_speed
