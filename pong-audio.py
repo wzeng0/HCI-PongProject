@@ -83,7 +83,7 @@ if __name__ == '__main__' :
         player_port = args.player_port
     if (args.debug):
         debug = True
-    # playsound('Directions.wav', True)
+    playsound('Directions.wav', True)
 
 # Host
 # -------------------------------------#
