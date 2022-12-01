@@ -36,8 +36,7 @@ import argparse
 from pythonosc import osc_server
 from pythonosc import dispatcher
 from pythonosc import udp_client
-
-from time import sleep
+from gtts import gTTS
 
 frames = 0
 
@@ -84,7 +83,7 @@ if __name__ == '__main__' :
         player_port = args.player_port
     if (args.debug):
         debug = True
-    playsound('Directions.wav', True)
+    # playsound('Directions.wav', True)
 
 # Host
 # -------------------------------------#
@@ -166,9 +165,8 @@ def on_receive_ball(address, *args):
         sound = "freq/" + str(int(rounded)) + "hz.wav"
         print(sound)
         playsound(sound, True)
-
     # sine(frequency=unscaled, duration=1.0)
-    print("> ball position: (" + str(args[0]) + ", " + str(args[1]) + ")")
+    # print("> ball position: (" + str(args[0]) + ", " + str(args[1]) + ")")
     pass
 
 def on_receive_paddle(address, *args):
@@ -245,6 +243,8 @@ p2_score = 0
 # -------------------------------------#
 def listen_to_speech():
     global quit
+    global p1_score
+    global p2_score
     while not quit:
         # obtain audio from the microphone
         r = sr.Recognizer()
@@ -379,10 +379,18 @@ class Model(object):
         self.ball.vec_y = random.choice([-1, 1]) * 2**0.5 / 2
         if who_scored == 0:
             playsound('P1_Scored.wav', True)
+            scoreString = str(p1_score) + " to " + str(p2_score)
+            speech = gTTS(scoreString, slow = False)
+            speech.save("score.wav")
+            playsound("score.wav")
             self.ball.x = self.WIDTH - 50.0 - self.ball.TO_SIDE
             self.ball.vec_x = - 2**0.5 / 2
         elif who_scored == 1:
             playsound('P2_Scored.wav', True)
+            scoreString = str(p2_score + 1) + " to " + str(p1_score)
+            speech = gTTS(scoreString, slow = False)
+            speech.save("score.wav")
+            playsound("score.wav")
             self.ball.x = 50.0 + self.ball.TO_SIDE
             self.ball.vec_x = + 2**0.5 / 2
         elif who_scored == "debug":
